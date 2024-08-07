@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-import sys
 import subprocess
 import io
 import pickle
@@ -20,14 +19,15 @@ import time
 import urllib3
 import shutil
 warnings.simplefilter(action="ignore", category=FutureWarning)
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) # type: ignore
+urllib3.disable_warnings(
+    urllib3.exceptions.InsecureRequestWarning)  # type: ignore
 
 requests_cache.install_cache(
     ".requests_cache",
     cache_control=True,
     expire_after=datetime.timedelta(hours=1),
     stale_if_error=True,
-    
+
 )
 
 
@@ -530,6 +530,7 @@ data_source_display_name_map = {
     "okta": "Okta",
 }
 
+
 def check_for_updates():
     # Fetch updates from the remote repository
     subprocess.call(['git', 'fetch'])
@@ -541,16 +542,18 @@ def check_for_updates():
     else:
         return False
 
+
 def update_and_restart():
     # Pull updates
     subprocess.call(['git', 'pull'])
     # Update any dependencies
     env_py = shutil.which("python")
-    subprocess.call([env_py, '-m', 'pip', 'install', '-r', 'requirements.txt']) # type: ignore
+    subprocess.call([env_py, '-m', 'pip', 'install', '-r',
+                    'requirements.txt'])  # type: ignore
     env_streamlit = shutil.which("streamlit")
     # print(env_py)
     # os.execv(env_py, (env_py, "run", "app.py")) # type: ignore
-    os.execv(env_streamlit, ("streamlit", "run", "app.py")) # type: ignore
+    os.execv(env_streamlit, ("streamlit", "run", "app.py"))  # type: ignore
 
 
 @st.cache_data
@@ -567,7 +570,8 @@ def getDetectionsAndDatasources(detections_version):
     """
 
     # Make a GET request to the data sources API endpoint and retrieve the data sources
-    response = requests.get("https://detections-api.herokuapp.com/get-data-sources/")
+    response = requests.get(
+        "https://detections-api.herokuapp.com/get-data-sources/")
     response_df = pd.DataFrame(response.json()["data_sources"])
     data_sources_df = response_df[["_id", "name"]]
 
@@ -609,7 +613,8 @@ class BearerAuth(requests.auth.AuthBase):  # type: ignore
 
 
 class StellarCyberAPI:
-    headers = {"Accept": "application/json", "Content-type": "application/json"}
+    headers = {"Accept": "application/json",
+               "Content-type": "application/json"}
 
     def __init__(self, url, username, api_key, is_saas):
         self.api_base_url = f"https://{url}/connect/api/"
@@ -650,7 +655,8 @@ class StellarCyberAPI:
                 headers=StellarCyberAPI.headers,
                 verify=False,
             )
-        tenant_options = sorted([i["cust_name"] for i in response.json()["data"]], key=str.lower)        
+        tenant_options = sorted([i["cust_name"]
+                                for i in response.json()["data"]], key=str.lower)
         return tenant_options
 
     def es_search(self, index, query):
@@ -722,7 +728,8 @@ class StellarCyberAPI:
         }
 
         if tenant:
-            log_bool_filter = {"bool": {"filter": [tenant_filter, log_msgtype_filter]}}
+            log_bool_filter = {
+                "bool": {"filter": [tenant_filter, log_msgtype_filter]}}
             connector_bool_filter = {
                 "bool": {"filter": [tenant_filter, connector_msgtype_filter]}
             }
@@ -801,7 +808,8 @@ class StellarCyberAPI:
                                         {
                                             "bool": {
                                                 "should": [
-                                                    {"match_phrase": {"feature": "ds"}}
+                                                    {"match_phrase": {
+                                                        "feature": "ds"}}
                                                 ],
                                                 "minimum_should_match": 1,
                                             }
@@ -809,7 +817,8 @@ class StellarCyberAPI:
                                         {
                                             "bool": {
                                                 "should": [
-                                                    {"match_phrase": {"mode": "agent"}}
+                                                    {"match_phrase": {
+                                                        "mode": "agent"}}
                                                 ],
                                                 "minimum_should_match": 1,
                                             }
@@ -835,7 +844,8 @@ class StellarCyberAPI:
                                         {
                                             "bool": {
                                                 "should": [
-                                                    {"match_phrase": {"mode": "agent"}}
+                                                    {"match_phrase": {
+                                                        "mode": "agent"}}
                                                 ],
                                                 "minimum_should_match": 1,
                                             }
@@ -893,7 +903,8 @@ class StellarCyberAPI:
                                         {
                                             "bool": {
                                                 "should": [
-                                                    {"match_phrase": {"feature": "ds"}}
+                                                    {"match_phrase": {
+                                                        "feature": "ds"}}
                                                 ],
                                                 "minimum_should_match": 1,
                                             }
@@ -901,7 +912,8 @@ class StellarCyberAPI:
                                         {
                                             "bool": {
                                                 "should": [
-                                                    {"match_phrase": {"mode": "device"}}
+                                                    {"match_phrase": {
+                                                        "mode": "device"}}
                                                 ],
                                                 "minimum_should_match": 1,
                                             }
@@ -927,7 +939,8 @@ class StellarCyberAPI:
                                         {
                                             "bool": {
                                                 "should": [
-                                                    {"match_phrase": {"mode": "device"}}
+                                                    {"match_phrase": {
+                                                        "mode": "device"}}
                                                 ],
                                                 "minimum_should_match": 1,
                                             }
@@ -1004,7 +1017,8 @@ class StellarCyberAPI:
                     }
                 }
             else:
-                bool_filter = {"bool": {"filter": [sensor_type_filter, msgtype_filter]}}
+                bool_filter = {
+                    "bool": {"filter": [sensor_type_filter, msgtype_filter]}}
 
             query_filter = [bool_filter, date_filter]
 
@@ -1046,7 +1060,8 @@ class StellarCyberAPI:
                 "unique_sensors": 0,
             }
             for b in response["aggregations"]["date"]["buckets"]:
-                sensor_stats["volume_per_day"]["date"].append(b["key_as_string"][0:10])
+                sensor_stats["volume_per_day"]["date"].append(
+                    b["key_as_string"][0:10])
                 sensor_stats["volume_per_day"]["volume"].append(
                     b["out_bytes_delta_total"]["value"]
                 )
@@ -1164,19 +1179,19 @@ def getRealDatasources(data_sources_df, api, tenant_name, timeframe, data_source
     sensor_data_sources = api.get_sensor_sources(
         timeframe[0], timeframe[1], tenant_name
     )
-    
+
     # Get the alert type hits for the given timeframe and tenant
     alert_type_hits = api.alert_stats(timeframe[0], timeframe[1], tenant_name)[
         "alert_type_hits"
     ]
-    
+
     # Combine the connector log data sources and sensor data sources
     data_sources_raw = connector_log_data_sources + sensor_data_sources
-    
+
     # Initialize lists to store the real data sources, non-present data sources, and additional data source options
     real_data_sources = []
     data_sources_np = []
-    
+
     # Iterate through the combined data sources
     for ds in data_sources_raw:
         # Check if the data source is in the data source display name map and not present in the data_sources_df DataFrame
@@ -1202,7 +1217,7 @@ def getRealDatasources(data_sources_df, api, tenant_name, timeframe, data_source
     additional_data_source_options = sorted(list(data_sources_df[
         ~data_sources_df["_id"].isin(real_data_sources)
     ]["_id"].values), key=str.lower)
-    
+
     # Return a tuple containing the alert type hits, real data sources, non-present data sources, and additional data source options
     return (
         alert_type_hits,
@@ -1233,7 +1248,8 @@ def get_matching_alert_types_count_from_ds(tactic, technique, response_df, data_
     technique_mask = response_df["XDR Technique"] == technique if technique else True
 
     # Create a boolean mask for rows where any of the data sources match
-    data_sources_mask = response_df["data_sources_combined"].apply(lambda x: any(item in x for item in data_sources))
+    data_sources_mask = response_df["data_sources_combined"].apply(
+        lambda x: any(item in x for item in data_sources))
 
     # Return the count of rows where all masks are True
     return response_df[tactic_mask & technique_mask & data_sources_mask].shape[0]
@@ -1256,7 +1272,8 @@ def get_matching_alert_types_count_from_hits(tactic, technique, response_df, ale
     # Create a query to filter the dataframe
     # The query checks if the 'XDR Tactic' column matches the given tactic
     # and if the 'XDR Display Name' column is in the list of hit alert types
-    query = (response_df["XDR Tactic"] == tactic) & (response_df["XDR Display Name"].isin(alert_type_hits))
+    query = (response_df["XDR Tactic"] == tactic) & (
+        response_df["XDR Display Name"].isin(alert_type_hits))
 
     # If a technique is given, add it to the query
     # The query now also checks if the 'XDR Technique' column matches the given technique
@@ -1650,7 +1667,8 @@ def color_boolean(val):
 def getStage(technique, detections_df):
     stage = None
     if stage in detections_df[detections_df["XDR Technique"] == technique]:
-        stage = detections_df[detections_df["XDR Technique"] == technique]["XDR Kill Chain Stage"].values[0]
+        stage = detections_df[detections_df["XDR Technique"]
+                              == technique]["XDR Kill Chain Stage"].values[0]
     return stage
 
 
@@ -1739,7 +1757,8 @@ def getHeatmapPlot(map_display, tactic_stats, technique_stats):
     hovers = [[]]
     for tactic in tactics:
         # label = '<br>'.join(textwrap.wrap(tactic, width=line_break_width, break_long_words=False, break_on_hyphens=True)) + '<br>(' + str(tactic_stats[tactic][map_config['num']]) + ' / ' + str(tactic_stats[tactic][map_config['denom']]) + ')'
-        label = f"{'<br>'.join(textwrap.wrap(tactic, width=line_break_width, break_on_hyphens=True, break_long_words=False))}:<br>({str(tactic_stats[tactic][map_config['num']])}/{str(tactic_stats[tactic][map_config['denom']])})<br>"
+        label = f"{'<br>'.join(textwrap.wrap(tactic, width=line_break_width, break_on_hyphens=True, break_long_words=False))}:<br>({
+            str(tactic_stats[tactic][map_config['num']])}/{str(tactic_stats[tactic][map_config['denom']])})<br>"
         # label = f"{textwrap.fill(tactic, width=line_break_width, break_long_words=False, replace_whitespace=True)}<br>({tactic_stats[tactic][map_config['num']]} / {tactic_stats[tactic][map_config['denom']]})"
         labels[0].append(label)
 
@@ -1757,7 +1776,8 @@ def getHeatmapPlot(map_display, tactic_stats, technique_stats):
                 / tactic_stats[tactic][map_config["denom"]]
             )
 
-        hover = f"<b>Tactic: </b>{tactic}<br>Total Alert Types Available: {tactic_stats[tactic][map_config['denom']]}<br>Total Alert Types Covered: {tactic_stats[tactic]['total_alert_types_covered']}<br>Total Alert Types Triggered: {tactic_stats[tactic]['total_alert_types_triggered']}"
+        hover = f"<b>Tactic: </b>{tactic}<br>Total Alert Types Available: {tactic_stats[tactic][map_config['denom']]}<br>Total Alert Types Covered: {
+            tactic_stats[tactic]['total_alert_types_covered']}<br>Total Alert Types Triggered: {tactic_stats[tactic]['total_alert_types_triggered']}"
         hovers[0].append(hover)
     col = 0
     for key, val in tactic_technique_map.items():
@@ -1803,7 +1823,8 @@ def getHeatmapPlot(map_display, tactic_stats, technique_stats):
                 + "<br>Total Alert Types Covered: "
                 + str(technique_stats[key][tech]["total_alert_types_covered"])
                 + "<br>Total Alert Types Triggered: "
-                + str(technique_stats[key][tech]["total_alert_types_triggered"])
+                + str(technique_stats[key][tech]
+                      ["total_alert_types_triggered"])
             )
             row += 1
         col += 1
@@ -1880,7 +1901,8 @@ def getAlertRecommendations(x, data_sources, detections_df):
         # Extract the relevant data from the detections dataframe
         # for the given XDR display name (x) and column (col)
         # using a nested list comprehension
-        recs += [d for ds in detections_df[detections_df["XDR Display Name"] == x][col].values for d in ds if d not in data_sources]
+        recs += [d for ds in detections_df[detections_df["XDR Display Name"]
+                                           == x][col].values for d in ds if d not in data_sources]
     # Combine the recommendations into a single string, removing duplicates
     # if the list is not empty, otherwise return None
     return ", ".join(set(recs)) if recs else None
@@ -1896,8 +1918,6 @@ def checkConfigState():
     ):
         if (
             st.session_state.host == ""
-            or st.session_state.user == ""
-            or st.session_state.api_key == ""
         ):
             return False
         else:
@@ -1921,8 +1941,6 @@ def initState():
         st.session_state.host = ""
     if "user" not in st.session_state:
         st.session_state.user = ""
-    if "api_key" not in st.session_state:
-        st.session_state.api_key = ""
     if "is_saas" not in st.session_state:
         st.session_state.is_saas = True
     if "detections_version" not in st.session_state:
@@ -1933,11 +1951,9 @@ def initState():
     #     st.session_state.timeframe = [datetime.datetime.today() - datetime.timedelta(days=7), datetime.datetime.today()]
 
 
-def saveState(host, user, api_key, is_saas, detections_version, tenant):
+def saveState(host, is_saas, detections_version, tenant):
     conf_dict = {
         "host": host,
-        "user": user,
-        "api_key": api_key,
         "is_saas": is_saas,
         "detections_version": detections_version,
         "tenant": tenant
@@ -1973,29 +1989,37 @@ def getFullReport(
         data=[
             go.Table(
                 header=dict(
-                    values=["<b>Tactic</b>", "<b>Available</b>", "<b>Covered</b>", "<b>Triggered</b>", "<b>Recommended</b>"],
+                    values=["<b>Tactic</b>", "<b>Available</b>",
+                            "<b>Covered</b>", "<b>Triggered</b>", "<b>Recommended</b>"],
                     line_color="#2d3436",
                     fill_color="#17233E",
                     align="center",
                     font=dict(color="#ffffff", size=8),
                 ),
                 cells=dict(
-                    values=[tactic_table_df[col] for col in tactic_table_df.columns],
+                    values=[tactic_table_df[col]
+                            for col in tactic_table_df.columns],
                     line_color="#2d3436",
                     fill_color=[
                         "#dfe6e9",
-                        [table_color_map[v] for v in tactic_table_df.available.values],
-                        [table_color_map[v] for v in tactic_table_df.covered.values],
-                        [table_color_map[v] for v in tactic_table_df.triggered.values],
+                        [table_color_map[v]
+                            for v in tactic_table_df.available.values],
+                        [table_color_map[v]
+                            for v in tactic_table_df.covered.values],
+                        [table_color_map[v]
+                            for v in tactic_table_df.triggered.values],
                         "#dfe6e9",
                     ],
                     align="left",
                     font=dict(
                         color=[
                             "#2d3436",
-                            [table_color_map[v] for v in tactic_table_df.available.values],
-                            [table_color_map[v] for v in tactic_table_df.covered.values],
-                            [table_color_map[v] for v in tactic_table_df.triggered.values],
+                            [table_color_map[v]
+                                for v in tactic_table_df.available.values],
+                            [table_color_map[v]
+                                for v in tactic_table_df.covered.values],
+                            [table_color_map[v]
+                                for v in tactic_table_df.triggered.values],
                             ["#dfe6e9" if v is None else "#2d3436" for v in tactic_table_df.recommended.values],
                         ],
                         size=8,
@@ -2041,9 +2065,12 @@ def getFullReport(
             "font": {"color": "#2d3436", "size": 9},
         }
         for title, percentage, total_available, total_covered, total_triggered, xanchor, x in [
-            ("Tactics Covered", tactic_covered_per, tactics_available, tactics_covered, tactics_triggered, "left", 0.00),
-            ("Techniques Covered", technique_per, techniques_available, techniques_covered, techniques_triggered, "center", 0.5),
-            ("Alert Types Covered", alert_type_per, alert_type_stats["total_alert_types_available"], alert_type_stats["total_alert_types_covered"], alert_type_stats["total_alert_types_triggered"], "right", 1.0),
+            ("Tactics Covered", tactic_covered_per, tactics_available,
+             tactics_covered, tactics_triggered, "left", 0.00),
+            ("Techniques Covered", technique_per, techniques_available,
+             techniques_covered, techniques_triggered, "center", 0.5),
+            ("Alert Types Covered", alert_type_per, alert_type_stats["total_alert_types_available"], alert_type_stats[
+             "total_alert_types_covered"], alert_type_stats["total_alert_types_triggered"], "right", 1.0),
         ]
     ]
 
@@ -2071,14 +2098,19 @@ def getFullReport(
                         font=dict(color="#ffffff", size=8),
                     ),
                     cells=dict(
-                        values=[tech_df.tactic, tech_df.technique, tech_df.available, tech_df.covered, tech_df.triggered, tech_df.recommended],  # type: ignore
+                        values=[tech_df.tactic, tech_df.technique, tech_df.available,
+                                tech_df.covered, tech_df.triggered, tech_df.recommended],  # type: ignore
                         # fill_color='white',
                         # line_color=['black', 'black', ['green' if v else 'red' for v in tech_df.available.values], ['green' if v else 'red' for v in tech_df.covered.values], ['green' if v else 'red' for v in tech_df.triggered.values]],
                         line_color="#2d3436",
-                        fill_color=["#dfe6e9", "#dfe6e9", ["#00b894" if v else "#d63031" for v in tech_df.available.values], ["#00b894" if v else "#d63031" for v in tech_df.covered.values], ["#00b894" if v else "#d63031" for v in tech_df.triggered.values], "#dfe6e9"],  # type: ignore
+                        fill_color=["#dfe6e9", "#dfe6e9", ["#00b894" if v else "#d63031" for v in tech_df.available.values], [
+                            # type: ignore
+                            "#00b894" if v else "#d63031" for v in tech_df.covered.values], ["#00b894" if v else "#d63031" for v in tech_df.triggered.values], "#dfe6e9"],
                         align="left",
                         font=dict(
-                            color=["#2d3436", "#2d3436", ["#00b894" if v else "#d63031" for v in tech_df.available.values], ["#00b894" if v else "#d63031" for v in tech_df.covered.values], ["#00b894" if v else "#d63031" for v in tech_df.triggered.values], ["#dfe6e9" if v is None else "#2d3436" for v in tech_df.recommended.values]],  # type: ignore
+                            color=["#2d3436", "#2d3436", ["#00b894" if v else "#d63031" for v in tech_df.available.values], ["#00b894" if v else "#d63031" for v in tech_df.covered.values], [
+                                # type: ignore
+                                "#00b894" if v else "#d63031" for v in tech_df.triggered.values], ["#dfe6e9" if v is None else "#2d3436" for v in tech_df.recommended.values]],
                             size=8,
                         ),
                     ),
@@ -2120,14 +2152,18 @@ def getFullReport(
                         font=dict(color="#ffffff", size=8),
                     ),
                     cells=dict(
-                        values=[alert_df.technique, alert_df.alert_type, alert_df.covered, alert_df.triggered, alert_df.recommended],  # type: ignore
+                        values=[alert_df.technique, alert_df.alert_type, alert_df.covered,
+                                alert_df.triggered, alert_df.recommended],  # type: ignore
                         # fill_color='white',
                         # line_color=['black', 'black', ['green' if v else 'red' for v in tech_df.available.values], ['green' if v else 'red' for v in tech_df.covered.values], ['green' if v else 'red' for v in tech_df.triggered.values]],
                         line_color="#2d3436",
-                        fill_color=["#dfe6e9", "#dfe6e9", ["#00b894" if v else "#d63031" for v in alert_df.covered.values], ["#00b894" if v else "#d63031" for v in alert_df.triggered.values], "#dfe6e9"],  # type: ignore
+                        fill_color=["#dfe6e9", "#dfe6e9", ["#00b894" if v else "#d63031" for v in alert_df.covered.values], [
+                            "#00b894" if v else "#d63031" for v in alert_df.triggered.values], "#dfe6e9"],  # type: ignore
                         align="left",
                         font=dict(
-                            color=["#2d3436", "#2d3436", ["#00b894" if v else "#d63031" for v in alert_df.covered.values], ["#00b894" if v else "#d63031" for v in alert_df.triggered.values], ["#dfe6e9" if (v is None or pd.isna(v)) else "#2d3436" for v in alert_df.recommended.values]],  # type: ignore
+                            color=["#2d3436", "#2d3436", ["#00b894" if v else "#d63031" for v in alert_df.covered.values], ["#00b894" if v else "#d63031" for v in alert_df.triggered.values], [
+                                # type: ignore
+                                "#dfe6e9" if (v is None or pd.isna(v)) else "#2d3436" for v in alert_df.recommended.values]],
                             size=8,
                         ),
                     ),
@@ -2181,16 +2217,21 @@ def main():
     st.caption("Version: 0.1.5")
     if st.button('Check for Updates', help="This will only work if you have cloned the repository"):
         with st.status("Checking for updates...", expanded=True) as updates_status:
-            st.caption("NOTE: This will only work if you have cloned the repository.")
+            st.caption(
+                "NOTE: This will only work if you have cloned the repository.")
             st.write("Checking remote repository...")
             if check_for_updates():
                 st.write("Found updates!")
-                updates_status.update(label="Found updates!", state="complete", expanded=True)
-                st.button('Update and Restart', type="primary", on_click=update_and_restart, help="This will perform a git pull on the repository and relaunch the application.")
-                st.caption("NOTE: This will perform a git pull on the repository and relaunch the application.")
+                updates_status.update(
+                    label="Found updates!", state="complete", expanded=True)
+                st.button('Update and Restart', type="primary", on_click=update_and_restart,
+                          help="This will perform a git pull on the repository and relaunch the application.")
+                st.caption(
+                    "NOTE: This will perform a git pull on the repository and relaunch the application.")
             else:
                 st.write("No updates found.")
-                updates_status.update(label="No updates found.", state="complete", expanded=False)
+                updates_status.update(
+                    label="No updates found.", state="complete", expanded=False)
 
     st.subheader("Overview", divider=True)
     st.markdown(
@@ -2234,7 +2275,7 @@ def main():
         "Stellar Cyber User",
         key="user",
         help="The Stellar Cyber API User Email",
-        autocomplete="on",
+        autocomplete="off",
         placeholder="example.user@stellarcyber.ai",
         disabled=False,
         label_visibility="visible",
@@ -2245,7 +2286,7 @@ def main():
         key="api_key",
         type="password",
         help="The Stellar Cyber API Key for the User",
-        autocomplete="password",
+        autocomplete="off",
         placeholder="API Key",
         disabled=False,
         label_visibility="visible",
@@ -2266,8 +2307,6 @@ def main():
     if config_section.button("Save"):
         saveState(
             st.session_state.host,
-            st.session_state.user,
-            st.session_state.api_key,
             st.session_state.is_saas,
             st.session_state.detections_version,
             st.session_state.tenant,
@@ -2280,8 +2319,8 @@ def main():
 
         api = StellarCyberAPI(
             url=st.session_state.host,
-            username=st.session_state.user,
-            api_key=st.session_state.api_key,
+            username=stellar_cyber_user,
+            api_key=stellar_api_key,
             is_saas=st.session_state.is_saas,
         )
         tenant_options = api.getTenants()
@@ -2315,8 +2354,6 @@ def main():
         else:
             saveState(
                 st.session_state.host,
-                st.session_state.user,
-                st.session_state.api_key,
                 st.session_state.is_saas,
                 st.session_state.detections_version,
                 st.session_state.tenant,
@@ -2330,7 +2367,8 @@ def main():
         st.session_state.detections_version
     )
 
-    alert_type_hits, real_data_sources, data_sources_np, additional_data_source_options = getRealDatasources(data_sources_df, api, st.session_state.tenant, st.session_state.timeframe, data_source_display_name_map)  # type: ignore
+    alert_type_hits, real_data_sources, data_sources_np, additional_data_source_options = getRealDatasources(
+        data_sources_df, api, st.session_state.tenant, st.session_state.timeframe, data_source_display_name_map)  # type: ignore
 
     simulation_section = st.sidebar.expander("Simulate", expanded=True)
 
@@ -2346,15 +2384,18 @@ def main():
 
     if len(data_sources_np) > 0:
         st.sidebar.info(
-            f'INFO: Data Sources that matched no mappings and were not considered in results - {", ".join(i for i in data_sources_np)}'
+            f'INFO: Data Sources that matched no mappings and were not considered in results - {
+                ", ".join(i for i in data_sources_np)}'
         )
 
     data_sources = real_data_sources + st.session_state.additional_data_sources
-    tactic_stats = getTacticStats(tactics, detections_df, data_sources, alert_type_hits)
+    tactic_stats = getTacticStats(
+        tactics, detections_df, data_sources, alert_type_hits)
     technique_stats = getTechniqueStats(
         tactics, tactic_technique_map, detections_df, data_sources, alert_type_hits
     )
-    alert_type_stats = getAlertTypeStats(detections_df, alert_type_hits, data_sources)
+    alert_type_stats = getAlertTypeStats(
+        detections_df, alert_type_hits, data_sources)
     data_source_stats_df = getDataSourceStats(detections_df, data_sources)
     (
         tactic_covered_per,
@@ -2377,38 +2418,47 @@ def main():
         st.metric(label="Tactics Covered", value=f"{tactic_covered_per:.0%}")
         st.divider()
         st.markdown("#### Tactics")
-        st.markdown(f"Number of Tactics in XDR Kill Chain: **{tactics_available}**")
         st.markdown(
-            f"Number of Tactics covered with data sources: **{tactics_covered}**"
+            f"Number of Tactics in XDR Kill Chain: **{tactics_available}**")
+        st.markdown(
+            f"Number of Tactics covered with data sources: **{
+                tactics_covered}**"
         )
         st.markdown(
-            f"Number of Tactics triggered in time period: **{tactics_triggered}**"
+            f"Number of Tactics triggered in time period: **{
+                tactics_triggered}**"
         )
     with col2:
         st.metric(label="Techniques Covered", value=f"{technique_per:.0%}")
         st.divider()
         st.markdown("#### Techniques")
         st.markdown(
-            f"Number of Techniques in XDR Kill Chain: **{techniques_available}**"
+            f"Number of Techniques in XDR Kill Chain: **{
+                techniques_available}**"
         )
         st.markdown(
-            f"Number of Techniques covered with data sources: **{techniques_covered}**"
+            f"Number of Techniques covered with data sources: **{
+                techniques_covered}**"
         )
         st.markdown(
-            f"Number of Techniques triggered in time period: **{techniques_triggered}**"
+            f"Number of Techniques triggered in time period: **{
+                techniques_triggered}**"
         )
     with col3:
         st.metric(label="Alert Types Covered", value=f"{alert_type_per:.0%}")
         st.divider()
         st.markdown("#### Alert Types")
         st.markdown(
-            f"Number of Alert Types in XDR Kill Chain: **{alert_type_stats['total_alert_types_available']}**"
+            f"Number of Alert Types in XDR Kill Chain: **{
+                alert_type_stats['total_alert_types_available']}**"
         )
         st.markdown(
-            f"Number of Alert Types covered with data sources: **{alert_type_stats['total_alert_types_covered']}**"
+            f"Number of Alert Types covered with data sources: **{
+                alert_type_stats['total_alert_types_covered']}**"
         )
         st.markdown(
-            f"Number of Alert Types triggered in time period: **{alert_type_stats['total_alert_types_triggered']}**"
+            f"Number of Alert Types triggered in time period: **{
+                alert_type_stats['total_alert_types_triggered']}**"
         )
 
     # st.divider()
@@ -2422,7 +2472,8 @@ def main():
         ),
         use_container_width=True,
         hide_index=True,
-        column_order=["tactic", "available", "covered", "triggered", "recommended"],
+        column_order=["tactic", "available",
+                      "covered", "triggered", "recommended"],
         column_config={
             "tactic": st.column_config.TextColumn(label="Tactic", width="small"),
             "available": st.column_config.CheckboxColumn(
@@ -2450,7 +2501,8 @@ def main():
 
     st.subheader("Techniques Coverage Table", divider=True)
 
-    technique_table_df = getTechniqueTable(technique_stats, detections_df, data_sources)
+    technique_table_df = getTechniqueTable(
+        technique_stats, detections_df, data_sources)
     # st.dataframe(technique_table_df.style.applymap(color_boolean, subset=['available', 'covered', 'triggered']), use_container_width=True, hide_index=True)
     st.dataframe(
         technique_table_df.style.applymap(
@@ -2507,7 +2559,8 @@ def main():
         ),
         use_container_width=True,
         hide_index=True,
-        column_order=["technique", "alert_type", "covered", "triggered", "recommended"],
+        column_order=["technique", "alert_type",
+                      "covered", "triggered", "recommended"],
         column_config={
             "technique": st.column_config.TextColumn(label="Technique", width="medium"),
             "alert_type": st.column_config.TextColumn(
@@ -2579,11 +2632,11 @@ def main():
             key="plot_by",
             help="Select whether you would like the Heatmap to calculate on Covered alert types or Triggered Alert types. (Triggered may give better visibility into custom alerts)",
         )
-    
+
     # coverage_plot = getHeatmapPlot(
     #     st.session_state.plot_by, tactic_stats, technique_stats
     # )
-    
+
     # col1, col2, col3, col4 = st.columns(4)
     # with col1:
     #     st.download_button(
@@ -2633,7 +2686,8 @@ def main():
                 key="download-coverage-heatmap-png",
             )
 
-        st.plotly_chart(coverage_plot, use_container_width=True, theme="streamlit")
+        st.plotly_chart(coverage_plot, use_container_width=True,
+                        theme="streamlit")
 
     elif st.session_state.chart_type == "Treemap":
         coverage_plot = getTreemapPlot(
@@ -2648,7 +2702,8 @@ def main():
                 "application/pdf",
                 key="download-coverage-treemap-pdf",
             )
-        st.plotly_chart(coverage_plot, use_container_width=True, theme="streamlit") # type: ignore
+        st.plotly_chart(coverage_plot, use_container_width=True,
+                        theme="streamlit")  # type: ignore
 
     st.divider()
 
@@ -2669,8 +2724,8 @@ def main():
             technique_per,
             alert_type_per,
             alert_type_stats_df,
-            coverage_plot, # type: ignore
-        ), 
+            coverage_plot,  # type: ignore
+        ),
         f"{st.session_state.tenant}_detection_coverage_report.pdf",
         "application/pdf",
         key="download-detection-coverage-report-pdf",
