@@ -635,6 +635,7 @@ class StellarCyberAPI:
                     headers=StellarCyberAPI.headers,
                     verify=False,
                 )
+                print(response)
             self.token = response.json()
             return response.json()
 
