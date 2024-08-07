@@ -1,4 +1,6 @@
 # Stellar Cyber Coverage Dashboard Streamlit App
+Changes on this Fork:
+Don't cache auth information to make app suitable for internal hosting
 
 This is a Python Streamlit app as a prototype/proof of concept using the Stellar Cyber Public API and the data from https://detections.stellarcyber.ai to calculate coverage and provide data source recommendations as well as simulate the coverage of those recommendations.
 
@@ -9,7 +11,7 @@ This is a Python Streamlit app as a prototype/proof of concept using the Stellar
 1. Clone the repository: `git clone https://github.com/stellarcyber/detection_coverage_app.git`
 2. Go to the cloned directory: `cd detection_coverage_app`
 3. Install the dependencies: `pip install -r requirements.txt`  or `pip3 install -r requirements.txt`
-4. Run the app: `streamlit run app.py`  
+4. Run the app: `streamlit run app.py`
    It should open a tab in your browser. (Tested in Chrome)
 5. To stop the app: `CTRL-C`
 
@@ -22,7 +24,7 @@ This is a Python Streamlit app as a prototype/proof of concept using the Stellar
 > [!NOTE]
 > To simply launch premade image
 1. Launch the Docker container: `docker run -p 8501:8501 ghcr.io/stellarcyber/detection_coverage_app/streamlit_coverage_analyzer:latest`
-   
+
 > [!NOTE]
 > To build image locally
 
